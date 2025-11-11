@@ -454,6 +454,7 @@
       const prefersDarkQuery = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
       const saved = localStorage.getItem(THEME_KEY);
 
+      // Установка начальной темы
       if (saved === 'dark' || saved === 'light') {
         document.body.dataset.theme = saved;
       } else if (prefersDarkQuery && prefersDarkQuery.matches) {
@@ -463,7 +464,9 @@
       }
 
       const syncIcon = () => {
+        if (!toggleBtn) return;
         toggleBtn.textContent = (document.body.dataset.theme === 'dark' ? '🌙' : '🌞');
+        toggleBtn.setAttribute('aria-label', document.body.dataset.theme === 'dark' ? 'Включена тёмная тема' : 'Включена светлая тема');
       };
       syncIcon();
 
@@ -475,9 +478,15 @@
         });
       }
 
-      // Переключение темы — логика перенесена в initTheme() выше
-        syncIcon();
-      });
+      // Переключение темы с сохранением выбора
+      if (toggleBtn) {
+        toggleBtn.addEventListener('click', () => {
+          const next = document.body.dataset.theme === 'dark' ? 'light' : 'dark';
+          document.body.dataset.theme = next;
+          localStorage.setItem(THEME_KEY, next);
+          syncIcon();
+        });
+      }
     })();
 
     // Анимация появления элементов при прокрутке
@@ -500,12 +509,7 @@
       });
     });
 
-    // Валидация и заглушка отправки формы
-    const form = document.getElementById('bookingForm');
-    const success = document.getElementById('formSuccess');
-
-    // Переключение темы
-    const toggleBtn = document.getElementById('themeToggle');
+    // Валидация и заглушка отправки формы$1// (переключение темы реализовано выше в initTheme)
     toggleBtn.addEventListener('click', () => {
       document.body.dataset.theme = document.body.dataset.theme === 'dark' ? 'light' : 'dark';
     });
