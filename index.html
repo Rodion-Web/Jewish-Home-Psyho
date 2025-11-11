@@ -166,8 +166,34 @@
       .hero .wrap { grid-template-columns: 1fr; }
       .grid-psy, .cards { grid-template-columns: repeat(2, 1fr); }
     }
-    @media (max-width: 640px) {
+    @media (max-width: 768px) {
+      /* показываем бургер, прячем навигацию, делаем сетки в одну колонку */
+      .burger { display:flex; }
       nav { display:none; }
+      nav.open { display:flex; position: absolute; top: 72px; left: 0; right: 0; background: var(--surface); border-bottom: 1px solid var(--border); flex-direction: column; padding: 12px 20px; gap: 10px; }
+      nav.open a { margin: 0; }
+      nav.open .btn { width: 100%; }
+      nav.open .theme-toggle {
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 6px 12px;
+      cursor: pointer;
+      color: var(--text);
+      font-size: 14px;
+    }
+
+    /* Burger button */
+    .burger { display:none; align-items:center; justify-content:center; width:40px; height:40px; border:1px solid var(--border); border-radius:10px; background: var(--surface); cursor:pointer; margin-left:auto; }
+    .burger span { display:block; width:20px; height:2px; background: var(--text); margin:3px 0; transition: transform .25s ease, opacity .25s ease; }
+    .burger.active span:nth-child(1) { transform: translateY(5px) rotate(45deg); }
+    .burger.active span:nth-child(2) { opacity: 0; }
+    .burger.active span:nth-child(3) { transform: translateY(-5px) rotate(-45deg); }
+
+      .cards, .grid-psy, form { grid-template-columns: 1fr; }
+      .actions { flex-direction: column; align-items: stretch; }
+      .btn { width: 100%; }
+    }
       .cards, .grid-psy, form { grid-template-columns: 1fr; }
       .actions { flex-direction: column; align-items: stretch; }
       .btn { width: 100%; }
@@ -201,16 +227,20 @@
     body, header, section, .card, .hero-card, .btn, .chip, .psy, .kpi, .avatar, input, select, textarea, footer, .theme-toggle {
       transition: background-color .35s ease, color .35s ease, border-color .35s ease, box-shadow .35s ease;
     }
+  /* Smooth theme transitions */
+    body, header, section, .card, .hero-card, .btn, .chip, .psy, .kpi, .avatar, input, select, textarea, footer, .theme-toggle {
+      transition: background-color .35s ease, color .35s ease, border-color .35s ease, box-shadow .35s ease;
+    }
   </style>
 </head>
 <body>
   <header>
     <div class="container nav">
-      <div class="brand">
-        <div class="logo" aria-hidden="true"></div>
-        <span>Спокойный ум</span>
-      </div>
-      <nav aria-label="Основная навигация">
+      <div class="brand">$1</div>
+      <button class="burger" id="burger" aria-label="Открыть меню" aria-expanded="false" aria-controls="mainNav">
+        <span></span><span></span><span></span>
+      </button>
+      <nav id="mainNav" aria-label="Основная навигация">
         <a href="#about">О нас</a>
         <a href="#services">Услуги</a>
         <a href="#team">Психологи</a>
@@ -224,7 +254,7 @@
     <section class="hero">
       <div class="container wrap">
         <div>
-          <h1 class="hero-title reveal">Психологическая помощь\nдля спокойной и осознанной жизни</h1>
+          <h1 class="hero-title reveal">Психологическая помощь <br>для спокойной и осознанной жизни</h1>
           <p class="hero-sub reveal" style="transition-delay:.05s">Индивидуальная и семейная терапия, поддержка при тревоге, выгорании и сложных жизненных ситуациях. Сдержанный дизайн, комфорт и забота с первого клика.</p>
           <div class="reveal" style="transition-delay:.1s">
             <a class="btn" href="#booking">Записаться на консультацию</a>
@@ -490,6 +520,38 @@
     })();
 
     // Анимация появления элементов при прокрутке
+    // Мобильное меню (бургер)
+    (function initBurger(){
+      const burger = document.getElementById('burger');
+      const nav = document.getElementById('mainNav');
+      if (!burger || !nav) return;
+
+      const closeMenu = () => {
+        burger.classList.remove('active');
+        burger.setAttribute('aria-expanded','false');
+        nav.classList.remove('open');
+      };
+
+      burger.addEventListener('click', () => {
+        const willOpen = !nav.classList.contains('open');
+        burger.classList.toggle('active', willOpen);
+        burger.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+        nav.classList.toggle('open', willOpen);
+      });
+
+      // Закрываем по клику на ссылку
+      nav.addEventListener('click', (e) => {
+        const t = e.target;
+        if (t.closest('a') || t.closest('.btn')) closeMenu();
+      });
+
+      // Закрыть по Esc
+      document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeMenu(); });
+
+      // Закрыть при ресайзе на десктоп
+      window.addEventListener('resize', () => { if (window.innerWidth > 768) closeMenu(); });
+    })();
+
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) entry.target.classList.add('in-view');
